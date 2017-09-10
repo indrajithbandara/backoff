@@ -14,12 +14,16 @@ import (
 // Backoff is not generally concurrent-safe, but the ForAttempt method can
 // be used concurrently.
 type Backoff struct {
-	//Factor is the multiplying factor for each increment step
-	attempt, Factor float64
-	//Jitter eases contention by randomizing backoff steps
+	// Factor is the multiplying factor for each increment step
+	Factor float64
+
+	// Jitter eases contention by randomizing backoff steps
 	Jitter bool
-	//Min and Max are the minimum and maximum values of the counter
+
+	// Min and Max are the minimum and maximum values of the counter
 	Min, Max time.Duration
+
+	attempt int
 }
 
 // Duration returns the duration for the current attempt before incrementing
@@ -38,7 +42,7 @@ const maxInt64 = float64(math.MaxInt64 - 512)
 // attempt should be 0.
 //
 // ForAttempt is concurrent-safe.
-func (b *Backoff) ForAttempt(attempt float64) time.Duration {
+func (b *Backoff) ForAttempt(attempt int) time.Duration {
 	// Zero-values are nonsensical, so we use
 	// them to apply defaults
 	min := b.Min
@@ -59,7 +63,7 @@ func (b *Backoff) ForAttempt(attempt float64) time.Duration {
 	}
 	//calculate this duration
 	minf := float64(min)
-	durf := minf * math.Pow(factor, attempt)
+	durf := minf * math.Pow(factor, float64(attempt))
 	if b.Jitter {
 		durf = rand.Float64()*(durf-minf) + minf
 	}
@@ -83,6 +87,6 @@ func (b *Backoff) Reset() {
 }
 
 // Attempt returns the current attempt counter value.
-func (b *Backoff) Attempt() float64 {
+func (b *Backoff) Attempt() int {
 	return b.attempt
 }

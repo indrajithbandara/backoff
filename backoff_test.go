@@ -1,9 +1,10 @@
 package backoff
 
 import (
-	"reflect"
 	"testing"
 	"time"
+
+	"github.com/tj/assert"
 )
 
 func Test1(t *testing.T) {
@@ -14,11 +15,11 @@ func Test1(t *testing.T) {
 		Factor: 2,
 	}
 
-	equals(t, b.Duration(), 100*time.Millisecond)
-	equals(t, b.Duration(), 200*time.Millisecond)
-	equals(t, b.Duration(), 400*time.Millisecond)
+	assert.Equal(t, b.Duration(), 100*time.Millisecond)
+	assert.Equal(t, b.Duration(), 200*time.Millisecond)
+	assert.Equal(t, b.Duration(), 400*time.Millisecond)
 	b.Reset()
-	equals(t, b.Duration(), 100*time.Millisecond)
+	assert.Equal(t, b.Duration(), 100*time.Millisecond)
 }
 
 func TestForAttempt(t *testing.T) {
@@ -29,11 +30,11 @@ func TestForAttempt(t *testing.T) {
 		Factor: 2,
 	}
 
-	equals(t, b.ForAttempt(0), 100*time.Millisecond)
-	equals(t, b.ForAttempt(1), 200*time.Millisecond)
-	equals(t, b.ForAttempt(2), 400*time.Millisecond)
+	assert.Equal(t, b.ForAttempt(0), 100*time.Millisecond)
+	assert.Equal(t, b.ForAttempt(1), 200*time.Millisecond)
+	assert.Equal(t, b.ForAttempt(2), 400*time.Millisecond)
 	b.Reset()
-	equals(t, b.ForAttempt(0), 100*time.Millisecond)
+	assert.Equal(t, b.ForAttempt(0), 100*time.Millisecond)
 }
 
 func Test2(t *testing.T) {
@@ -44,11 +45,11 @@ func Test2(t *testing.T) {
 		Factor: 1.5,
 	}
 
-	equals(t, b.Duration(), 100*time.Millisecond)
-	equals(t, b.Duration(), 150*time.Millisecond)
-	equals(t, b.Duration(), 225*time.Millisecond)
+	assert.Equal(t, b.Duration(), 100*time.Millisecond)
+	assert.Equal(t, b.Duration(), 150*time.Millisecond)
+	assert.Equal(t, b.Duration(), 225*time.Millisecond)
 	b.Reset()
-	equals(t, b.Duration(), 100*time.Millisecond)
+	assert.Equal(t, b.Duration(), 100*time.Millisecond)
 }
 
 func Test3(t *testing.T) {
@@ -59,11 +60,11 @@ func Test3(t *testing.T) {
 		Factor: 1.75,
 	}
 
-	equals(t, b.Duration(), 100*time.Nanosecond)
-	equals(t, b.Duration(), 175*time.Nanosecond)
-	equals(t, b.Duration(), 306*time.Nanosecond)
+	assert.Equal(t, b.Duration(), 100*time.Nanosecond)
+	assert.Equal(t, b.Duration(), 175*time.Nanosecond)
+	assert.Equal(t, b.Duration(), 306*time.Nanosecond)
 	b.Reset()
-	equals(t, b.Duration(), 100*time.Nanosecond)
+	assert.Equal(t, b.Duration(), 100*time.Nanosecond)
 }
 
 func Test4(t *testing.T) {
@@ -73,7 +74,7 @@ func Test4(t *testing.T) {
 		Factor: 1,
 	}
 
-	equals(t, b.Duration(), b.Max)
+	assert.Equal(t, b.Duration(), b.Max)
 }
 
 func TestGetAttempt(t *testing.T) {
@@ -82,17 +83,17 @@ func TestGetAttempt(t *testing.T) {
 		Max:    10 * time.Second,
 		Factor: 2,
 	}
-	equals(t, b.Attempt(), float64(0))
-	equals(t, b.Duration(), 100*time.Millisecond)
-	equals(t, b.Attempt(), float64(1))
-	equals(t, b.Duration(), 200*time.Millisecond)
-	equals(t, b.Attempt(), float64(2))
-	equals(t, b.Duration(), 400*time.Millisecond)
-	equals(t, b.Attempt(), float64(3))
+	assert.Equal(t, b.Attempt(), 0)
+	assert.Equal(t, b.Duration(), 100*time.Millisecond)
+	assert.Equal(t, b.Attempt(), 1)
+	assert.Equal(t, b.Duration(), 200*time.Millisecond)
+	assert.Equal(t, b.Attempt(), 2)
+	assert.Equal(t, b.Duration(), 400*time.Millisecond)
+	assert.Equal(t, b.Attempt(), 3)
 	b.Reset()
-	equals(t, b.Attempt(), float64(0))
-	equals(t, b.Duration(), 100*time.Millisecond)
-	equals(t, b.Attempt(), float64(1))
+	assert.Equal(t, b.Attempt(), 0)
+	assert.Equal(t, b.Duration(), 100*time.Millisecond)
+	assert.Equal(t, b.Attempt(), 1)
 }
 
 func TestJitter(t *testing.T) {
@@ -103,11 +104,11 @@ func TestJitter(t *testing.T) {
 		Jitter: true,
 	}
 
-	equals(t, b.Duration(), 100*time.Millisecond)
+	assert.Equal(t, b.Duration(), 100*time.Millisecond)
 	between(t, b.Duration(), 100*time.Millisecond, 200*time.Millisecond)
 	between(t, b.Duration(), 100*time.Millisecond, 400*time.Millisecond)
 	b.Reset()
-	equals(t, b.Duration(), 100*time.Millisecond)
+	assert.Equal(t, b.Duration(), 100*time.Millisecond)
 }
 
 func between(t *testing.T, actual, low, high time.Duration) {
@@ -116,11 +117,5 @@ func between(t *testing.T, actual, low, high time.Duration) {
 	}
 	if actual > high {
 		t.Fatalf("Got %s, Expecting <= %s", actual, high)
-	}
-}
-
-func equals(t *testing.T, v1, v2 interface{}) {
-	if !reflect.DeepEqual(v1, v2) {
-		t.Fatalf("Got %v, Expecting %v", v1, v2)
 	}
 }
